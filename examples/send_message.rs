@@ -17,8 +17,8 @@ async fn main() -> anyhow::Result<()> {
     // Stream 是最顶层的数据容器，类似于一个"仓库"
     // 如果 Stream 已存在，忽略 StreamNameAlreadyExists 错误
     match client.create_stream(stream_name).await {
-        Ok(_) => println!("Stream 'message-platform' create successfully"),
-        Err(IggyError::StreamNameAlreadyExists(_)) => println!("Stream aleardy exists，keey going"),
+        Ok(_) => println!("Stream 'message-platform' created successfully"),
+        Err(IggyError::StreamNameAlreadyExists(_)) => println!("Stream already exists, keep going"),
         Err(e) => return Err(e.into()),
     }
 
@@ -37,7 +37,7 @@ async fn main() -> anyhow::Result<()> {
         )
         .await
     {
-        Ok(_) => println!("Topic '{}' create successfully", topic_name),
+        Ok(_) => println!("Topic '{}' created successfully", topic_name),
         Err(IggyError::TopicNameAlreadyExists(_, _)) => println!("Topic 已存在，继续使用"),
         Err(e) => return Err(e.into()),
     }
