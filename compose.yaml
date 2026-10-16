@@ -9,7 +9,8 @@
 # 另外两个必须项（去掉任意一个服务端都起不来 / 连不上）：
 #   - seccomp:unconfined：服务端用 io_uring + NUMA 内存绑定，
 #     默认 seccomp 配置会直接 kill 进程（panic: Operation not permitted）
-#   - IGGY_*_ADDRESS 绑 0.0.0.0：容器内默认只绑 127.0.0.1，端口映射无法到达
+#   - IGGY_*_ADDRESS 绑 0.0.0.0：容器内默认只绑 127.0.0.1（含 websocket 的
+#     127.0.0.1:8092），端口映射无法到达
 #     （QUIC 同理，且必须显式映射 8080/udp，UDP 没有 TCP 的连接拒绝，
 #      不映射时客户端只会无限重传握手包，表现为 connect() 永久挂起）
 #   - QUIC 是 UDP：端口映射必须写 /udp，且 SDK 端口与 [quic] address 一致
@@ -28,11 +29,13 @@ services:
       IGGY_TCP_ADDRESS: 0.0.0.0:8090
       IGGY_QUIC_ADDRESS: 0.0.0.0:8080
       IGGY_HTTP_ADDRESS: 0.0.0.0:3000
+      IGGY_WEBSOCKET_ADDRESS: 0.0.0.0:8092
       IGGY_NODE_ADVERTISED_ADDRESS: 127.0.0.1
     ports:
       - "8090:8090" # TCP，SDK 默认 transport
       - "8080:8080/udp" # QUIC（UDP！），quic_client.rs 连接此端口
       - "3000:3000" # HTTP API，健康检查：curl http://127.0.0.1:3000/ping
+      - "8092:8092" # WebSocket，websocket_client.rs 连接此端口
     volumes:
       - iggy-data:/data/iggy
 
