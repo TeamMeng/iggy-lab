@@ -15,7 +15,10 @@ async fn main() -> anyhow::Result<()> {
     println!("Login successfully...");
 
     let stats = client.get_stats().await?;
-    println!("Server version: {:?}", stats);
+    println!(
+        "Server stats: streams={}, topics={}, clients={}",
+        stats.streams_count, stats.topics_count, stats.clients_count
+    );
 
     Ok(())
 }
