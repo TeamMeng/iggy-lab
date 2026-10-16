@@ -36,6 +36,26 @@ pipx install pre-commit
 pre-commit install
 ```
 
+## 启动 Iggy 服务端
+
+```bash
+docker compose up -d     # 启动（首次自动拉镜像）
+docker compose logs -f   # 查看日志
+docker compose down      # 停止（数据保留在 iggy-data 卷）
+```
+
+健康检查与运行示例：
+
+```bash
+curl http://127.0.0.1:3000/ping    # pong
+cargo run --example quick_start    # Connect successfully...
+```
+
+> 镜像 tag 与 iggy SDK 版本号是两套编号，二进制协议必须配对（当前已验证：
+> `apache/iggy:0.9.1-edge.1` ↔ `iggy = "0.11.0"`）。换镜像 tag 之前先看
+> [compose.yaml](compose.yaml) 顶部注释，否则会出现 `Incompatible binary
+> protocol version` 或服务端直接起不来。
+
 ## 常用命令
 
 ```bash

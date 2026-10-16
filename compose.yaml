@@ -1,0 +1,36 @@
+# Apache Iggy 单节点服务端（本机开发用）
+#
+# 版本配对（重要）：镜像 tag 与 crates.io 上 iggy SDK 的版本号是两套编号，
+# 二者的二进制协议必须兼容，否则客户端 connect() 会失败：
+#     Incompatible binary protocol version: client 0.11.0, server accepts [0.11.1, 0.11.1]
+# 已验证配对：apache/iggy:0.9.1-edge.1 <-> iggy = "0.11.0"（见 Cargo.toml）
+# 不要用浮动 tag：edge（2026-10-15 构建）已只接受协议 0.11.1。
+#
+# 另外两个必须项（去掉任意一个服务端都起不来 / 连不上）：
+#   - seccomp:unconfined：服务端用 io_uring + NUMA 内存绑定，
+#     默认 seccomp 配置会直接 kill 进程（panic: Operation not permitted）
+#   - IGGY_*_ADDRESS 绑 0.0.0.0：容器内默认只绑 127.0.0.1，端口映射无法到达
+services:
+  iggy:
+    image: apache/iggy:0.9.1-edge.1
+    container_name: iggy-server
+    restart: unless-stopped
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      IGGY_ROOT_USERNAME: iggy
+      IGGY_ROOT_PASSWORD: iggy
+      # 默认数据目录是相对路径 local_data，显式指到数据卷
+      IGGY_PATH: /data/iggy
+      IGGY_TCP_ADDRESS: 0.0.0.0:8090
+      IGGY_HTTP_ADDRESS: 0.0.0.0:3000
+      IGGY_NODE_ADVERTISED_ADDRESS: 127.0.0.1
+    ports:
+      - "8090:8090" # TCP，SDK 默认 transport
+      - "3000:3000" # HTTP API，健康检查：curl http://127.0.0.1:3000/ping
+    volumes:
+      - iggy-data:/data/iggy
+
+volumes:
+  iggy-data:
+    name: iggy-data
