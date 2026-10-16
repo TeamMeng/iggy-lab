@@ -47,7 +47,7 @@ async fn main() -> anyhow::Result<()> {
     let producer = client.producer(stream_name, topic_name)?.build();
     producer.init().await?;
 
-    let msg = IggyMessage::from_str("新订单：宫保鸡丁套餐，地址：成都市武侯区xxx号")?;
+    let msg = IggyMessage::from_str("新订单：宫保鸡丁套餐，地址：某市某区xxx号")?;
 
     let response = producer.send(vec![msg]).await?;
     for confirmation in &response.confirmations {
