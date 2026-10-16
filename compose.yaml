@@ -10,6 +10,9 @@
 #   - seccomp:unconfined：服务端用 io_uring + NUMA 内存绑定，
 #     默认 seccomp 配置会直接 kill 进程（panic: Operation not permitted）
 #   - IGGY_*_ADDRESS 绑 0.0.0.0：容器内默认只绑 127.0.0.1，端口映射无法到达
+#     （QUIC 同理，且必须显式映射 8080/udp，UDP 没有 TCP 的连接拒绝，
+#      不映射时客户端只会无限重传握手包，表现为 connect() 永久挂起）
+#   - QUIC 是 UDP：端口映射必须写 /udp，且 SDK 端口与 [quic] address 一致
 services:
   iggy:
     image: apache/iggy:0.9.1-edge.1
@@ -23,10 +26,12 @@ services:
       # 默认数据目录是相对路径 local_data，显式指到数据卷
       IGGY_PATH: /data/iggy
       IGGY_TCP_ADDRESS: 0.0.0.0:8090
+      IGGY_QUIC_ADDRESS: 0.0.0.0:8080
       IGGY_HTTP_ADDRESS: 0.0.0.0:3000
       IGGY_NODE_ADVERTISED_ADDRESS: 127.0.0.1
     ports:
       - "8090:8090" # TCP，SDK 默认 transport
+      - "8080:8080/udp" # QUIC（UDP！），quic_client.rs 连接此端口
       - "3000:3000" # HTTP API，健康检查：curl http://127.0.0.1:3000/ping
     volumes:
       - iggy-data:/data/iggy
